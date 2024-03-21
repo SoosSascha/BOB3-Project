@@ -22,9 +22,10 @@ void AnschalteAnimation() {
 void loop() {
   	//Initialize Vars
     int on = 0;
-  	int arm1 = 0;
-  	int arm2 = 0;
-  	int time = 0;
+    int run = 0;
+    int arm1 = 0;
+    int arm2 = 0;
+    int time = 0;
     int ptime = 0;
   
   	//Arm Input
@@ -41,7 +42,7 @@ void loop() {
         bob3.setWhiteLeds(OFF, OFF);
     }
 	
-    //Working Loop
+    //Input Loop
     while (on == 1) {
         //Get Arm Input
         arm1 = bob3.getArm(1);
@@ -52,7 +53,7 @@ void loop() {
     	arm2 = 0;
         }
         //Arm Input Translation
-        //Both Middle Arm
+        //Both Middle Arm (Timer Loop Start)
         if (arm1 == 2 && arm2 == 2) {
 			bob3.setWhiteLeds(ON, ON);
         	delay(1000);
@@ -61,8 +62,9 @@ void loop() {
             arm1 = 0;
     	    arm2 = 0;
             on = 0;
+            run = 1;
         }      
-        //Upper Arm1
+        //Upper Arm1 (- Arbeitszeit)
       	if (arm1 == 1) {
         	time++;
         	bob3.setLed(1, BLUE);
@@ -70,7 +72,7 @@ void loop() {
         	bob3.setLed(1, OFF);
             delay(100);
         }
-      	//Middle Arm1
+      	//Middle Arm1 (Check Arbeitszeit)
         else if (arm1 == 2 && time != 0) {
             int checktime = time;
             while (checktime > 9) {
@@ -89,7 +91,7 @@ void loop() {
             }
             delay(500);
         }
-        //Lower Arm1
+        //Lower Arm1 (- Arbeitszeit)
         else if (arm1 == 3 && time > 0) {
         	time--;
         	bob3.setLed(1, RED);
@@ -103,7 +105,7 @@ void loop() {
    			bob3.setWhiteLeds(OFF, OFF);
             delay(100);
         }
-        //Upper Arm2
+        //Upper Arm2 (+ Pausenzeit)
         if (arm2 == 1) {
             ptime++;
         	bob3.setLed(2, BLUE);
@@ -111,7 +113,7 @@ void loop() {
         	bob3.setLed(2, OFF);
             delay(100);
         } 
-        //Middle Arm2
+        //Middle Arm2 (Check Pausenzeit)
         else if (arm2 == 2 && ptime != 0) {
             int checkptime = ptime;
             while (checkptime > 9) {
@@ -130,7 +132,7 @@ void loop() {
             }
             delay(500);
         }
-        //Lower Arm2
+        //Lower Arm2 (- Pausenzeit)
         else if (arm2 == 3 && ptime > 0) {
         	ptime--;
         	bob3.setLed(2, RED);
@@ -145,5 +147,45 @@ void loop() {
             delay(100);
         }
 	}
-    //Run Timer
+    //Run Timer Loop
+    while (run == 1) {
+      	//Arbeitszeit
+      	for (int i = (time*60)+1; i > 0; i--) {
+          	bob3.setEyes(PURPLE, PURPLE);
+          	delay(500);
+            bob3.setEyes(OFF, OFF);
+            //Check if User wants to stop
+            arm1 = bob3.getArm(1);
+        	arm2 = bob3.getArm(2);
+            if (arm1 > 0 && arm2 > 0) {
+               run = 0;
+               break;
+            }
+            delay(500);
+        }
+      	//Pausenzeit
+      	if (run != 0) {
+      		for (int j = (ptime*60)+1; j > 0; j--) {
+        		bob3.setEyes(AQUAMARINE, AQUAMARINE);
+          		delay(500);
+            	bob3.setEyes(OFF, OFF);
+            	//Check if User wants to stop
+                arm1 = bob3.getArm(1);
+        		arm2 = bob3.getArm(2);
+            	if (arm1 > 0 && arm2 > 0) {
+               		run = 0;
+               		break;
+            	}
+            delay(500);
+        	}
+        }
+      	else {
+        //End Animation
+    	bob3.setEyes(RED, RED);
+      	bob3.setWhiteLeds(ON, ON);
+    	delay(1500);
+    	bob3.setEyes(OFF, OFF);
+      	bob3.setWhiteLeds(OFF, OFF);
+        }
+    }
 }
